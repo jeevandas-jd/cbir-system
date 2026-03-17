@@ -1,24 +1,28 @@
-# scripts/extract_features.py
-
 import os
 import numpy as np
 from models.feature_extractor import FeatureExtractor
 
 extractor = FeatureExtractor()
 
+dataset_path = "data/raw"
+
 features = []
 paths = []
 
-dataset_path = "data/raw"
+for root, dirs, files in os.walk(dataset_path):
+    for file in files:
+        if file.endswith(".png"):
+            path = os.path.join(root, file)
 
-for img_name in os.listdir(dataset_path):
-    path = os.path.join(dataset_path, img_name)
+            feat = extractor.extract(path)
+            features.append(feat)
+            paths.append(path)
 
-    feat = extractor.extract(path)
-    features.append(feat)
-    paths.append(path)
+features = np.array(features)
 
 np.save("embeddings/features.npy", features)
 
 import pickle
 pickle.dump(paths, open("embeddings/image_paths.pkl", "wb"))
+
+print("✅ Features extracted:", features.shape)
